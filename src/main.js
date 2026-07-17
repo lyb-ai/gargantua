@@ -1,5 +1,8 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 
 const canvas = document.querySelector("#scene");
 const diskSpeedInput = document.querySelector("#diskSpeed");
@@ -21,7 +24,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.2;
+renderer.toneMappingExposure = 1.08;
 
 const camera = new THREE.PerspectiveCamera(
   48,
@@ -47,6 +50,29 @@ controls.maxDistance = 26;
 controls.target.set(0, 0.2, 0);
 controls.autoRotate = true;
 controls.autoRotateSpeed = 0.34;
+
+const composer = new EffectComposer(renderer);
+const renderPass = new RenderPass(scene, camera);
+const bloomPass = new UnrealBloomPass(
+  new THREE.Vector2(window.innerWidth, window.innerHeight),
+  0.58,
+  0.38,
+  0.68
+);
+
+composer.addPass(renderPass);
+composer.addPass(bloomPass);
+composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+composer.setSize(window.innerWidth, window.innerHeight);
+
+function tuneBloomForViewport() {
+  const narrow = window.innerWidth < 760;
+  bloomPass.strength = narrow ? 0.44 : 0.58;
+  bloomPass.radius = narrow ? 0.32 : 0.38;
+  bloomPass.threshold = narrow ? 0.72 : 0.68;
+}
+
+tuneBloomForViewport();
 
 scene.add(new THREE.AmbientLight(0x6f8790, 0.28));
 
@@ -606,10 +632,14 @@ orbitButton.addEventListener("click", () => {
 window.addEventListener("resize", () => {
   const width = window.innerWidth;
   const height = window.innerHeight;
+  const pixelRatio = Math.min(window.devicePixelRatio, 2);
   camera.aspect = width / height;
   fitCameraToViewport();
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  tuneBloomForViewport();
+  renderer.setPixelRatio(pixelRatio);
   renderer.setSize(width, height);
+  composer.setPixelRatio(pixelRatio);
+  composer.setSize(width, height);
 });
 
 function animate() {
@@ -625,7 +655,7 @@ function animate() {
   farCaustic.rotation.z = elapsed * 0.026;
   lensPlane.quaternion.copy(camera.quaternion);
   controls.update();
-  renderer.render(scene, camera);
+  composer.render();
   requestAnimationFrame(animate);
 }
 
