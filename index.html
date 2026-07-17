@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gargantua Black Hole</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.166.1/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.166.1/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="viewport" aria-label="Gargantua black hole model">
+        <canvas id="scene"></canvas>
+        <div class="hud" aria-label="simulation controls">
+          <div class="panel stats">
+            <span>Gargantua</span>
+            <strong id="readout">1.00x</strong>
+          </div>
+          <div class="panel controls">
+            <label>
+              <span>吸积盘</span>
+              <input id="diskSpeed" type="range" min="0" max="2" step="0.01" value="1" />
+            </label>
+            <label>
+              <span>引力透镜</span>
+              <input id="lensPower" type="range" min="0.35" max="1.35" step="0.01" value="0.85" />
+            </label>
+            <label>
+              <span>细节强度</span>
+              <input id="detailPower" type="range" min="0.35" max="1.4" step="0.01" value="1" />
+            </label>
+            <button id="toggleOrbit" type="button" aria-pressed="true">暂停轨道</button>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
